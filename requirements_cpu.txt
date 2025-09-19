@@ -1,0 +1,14 @@
+transformers>=4.35.0
+datasets
+sentence-transformers
+faiss-cpu
+pdfplumber
+pytesseract
+Pillow
+torch          # CPU build; see note below if install fails
+accelerate
+streamlit
+networkx
+plotly
+scikit-learn
+tiktoken      # optional tokenizer
