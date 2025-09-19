@@ -1,0 +1,14 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local data (don’t upload PDFs to GitHub)
+data/
+faiss_index/
+
+# OS files
+.DS_Store
+Thumbs.db
