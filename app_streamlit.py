@@ -35,10 +35,12 @@ st.title("📚 Chat with your Documents (Local LLM Edition)")
 # Helper functions
 # --------------------------
 def clean_text(text):
-    """Clean a text chunk before sending to LLM"""
-    text = re.sub(r'\S+@\S+', '', text)      # remove emails
-    text = re.sub(r'\[\d+\]', '', text)      # remove references like [1]
-    text = re.sub(r'\s+', ' ', text)         # collapse multiple spaces/newlines
+    """Clean PDF text chunks"""
+    text = re.sub(r'\S+@\S+', '', text)         # remove emails
+    text = re.sub(r'\[\d+\]', '', text)         # remove references like [1]
+    text = re.sub(r'Fig\.\s*\d+', '', text)     # remove figure numbers
+    text = re.sub(r'http\S+', '', text)         # remove URLs
+    text = re.sub(r'\s+', ' ', text)            # collapse whitespace
     return text.strip()
 
 def generate_answer_ollama(query, context, base_url=OLLAMA_BASE, model=OLLAMA_MODEL, timeout=60):
@@ -72,6 +74,12 @@ Answer:
     except RequestException:
         return None
 
+def summarize_chunk(chunk):
+    """
+    Optional: summarize each chunk before sending to LLM to reduce noise
+    """
+    return generate_answer_ollama("Summarize this text briefly:", chunk) or chunk
+
 # --------------------------
 # Main query input
 # --------------------------
@@ -81,19 +89,18 @@ if query:
     # Encode query
     query_vec = embedder.encode([query])
     
-    # Retrieve top-k chunks (more for context)
-    k = 5
+    # Retrieve top-k chunks (k can be adjusted)
+    k = 3
     D, I = index.search(query_vec, k=k)
     
     # Clean chunks
     context_chunks = [clean_text(documents[i]) for i in I[0]]
-    context = " ".join(context_chunks)
     
-    # Optional: Summarize chunks individually before feeding (if needed)
-    # This can reduce token usage for long PDFs
-    # for chunk in context_chunks:
-    #     chunk_summary = generate_answer_ollama("Summarize this text:", chunk)
-    #     context = " ".join([context, chunk_summary])
+    # Optional: summarize each chunk
+    summarized_chunks = []
+    for chunk in context_chunks:
+        summarized_chunks.append(summarize_chunk(chunk))
+    context = " ".join(summarized_chunks)
     
     # Generate answer via Ollama
     answer = generate_answer_ollama(query, context)
