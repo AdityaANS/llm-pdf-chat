@@ -28,8 +28,8 @@ def generate_answer_ollama(query, context, base_url=OLLAMA_BASE, model=OLLAMA_MO
     Allows reasoning and paraphrasing, rather than verbatim extraction.
     """
     prompt = f"""
-Answer the question using the context below.
-You can summarize, explain, or rephrase the answer in natural language.
+Using the context below, answer the question naturally in your own words.
+You can summarize, explain, or paraphrase.
 If the answer is not in the context, say 'I don't know'.
 
 Context:
